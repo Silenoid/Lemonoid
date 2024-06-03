@@ -26,3 +26,32 @@ jobs:
 
     - name: Test
       run: go test -v ./...
+
+  # taken from https://medium.com/@balazskocsis/deploying-to-a-server-with-github-actions-a-deep-dive-e8558e83a4d7
+  deploy:
+    if: false # disabled for now
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up SSH key
+        run: |
+          env
+          mkdir -p ~/.ssh
+          echo "${{ secrets.ARTIFACT_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p 22 ${{ secrets.ARTIFACT_HOST }} >> ~/.ssh/known_hosts
+          sudo apt-get install sshpass
+
+      - name: Deploy to server
+        run: |
+          sshpass -p '${{ secrets.PSWD }}' ssh -v -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} <<'ENDSSH'
+          cd ${{ secrets.APP_PATH }}
+          git pull
+          docker stop ${{ secrets.APP_NAME }}
+          docker system prune -f
+          export ${{ secrets.API_KEY_NAME }}=${{ secrets.API_KEY }}
+          make deploy_headless
+          ENDSSH
+
