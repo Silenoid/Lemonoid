@@ -26,7 +26,7 @@ jobs:
       run: go test -v ./...
 
     - name: Build
-      run: go build -v ./... && ls
+      run: go build -o ./lemonoid ./cmd/main/
 
     - name: copy file via ssh password
       uses: appleboy/scp-action@v0.1.7
@@ -35,5 +35,5 @@ jobs:
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
-        source: "tests/a.txt,tests/b.txt"
-        target: your_server_target_folder_path
+        source: "lemonoid"
+        target: ~/Server/pm2/lemonoid
