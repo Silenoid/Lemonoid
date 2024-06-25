@@ -54,6 +54,7 @@ func Initialize(isDebugging bool) {
 	tgclient.Debug = isDebugging
 
 	startTime = time.Now()
+	sendMessage(CHATID_LORD, "Lemonoid awakened at "+startTime.String())
 }
 
 func Listen() {
