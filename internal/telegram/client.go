@@ -163,7 +163,7 @@ func handlerTldr(update tgbotapi.Update) error {
 
 func handlerHelp(update tgbotapi.Update) error {
 	sendMessage(update.Message.Chat.ID, `Aò a manzo, eccote du seppie e ttre ppiovre de aiuto:
-	/help	l'hai usato mò a cojone, ma che sei frocio?
+	/help	l'hai usato mò a cojone, ma che sei frocio (come Matteo finto?)?
 	/tldr	azzì questo teggenera er tuloddonrì
 	/status	je chiedi mammamiacommestaaa
 	`)
