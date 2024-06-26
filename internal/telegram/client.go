@@ -219,22 +219,6 @@ func handlerStamoce(update tgbotapi.Update) error {
 	return nil
 }
 
-func handlerHelp(update tgbotapi.Update) error {
-	sendMessage(update.Message.Chat.ID, `Aò a manzo, eccote du seppie e ttre ppiovre de aiuto:
-	/help	l'hai usato mò a cojone, ma che sei frocio?
-	/tldr	azzì questo teggenera er tuloddonrì
-	/status	je chiedi mammamiacommestaaa
-	`)
-	return nil
-}
-
-func handlerStatus(update tgbotapi.Update) error {
-	ElevenLabsSubStatus := elevenlabs.GetSubscriptionStatus()
-	// TODO: get OpenAI usage with a request (see openai client.go)
-	sendMessage(update.Message.Chat.ID, ElevenLabsSubStatus)
-	return nil
-}
-
 func sendAudio(chatId int64, audioPath string) {
 	audioFile := tgbotapi.FilePath(audioPath)
 	msg := tgbotapi.NewAudio(chatId, audioFile)
