@@ -120,14 +120,32 @@ func processAndDispatch(update tgbotapi.Update) error {
 		switch update.Message.Command() {
 		case "help":
 			return handlerHelp(update)
-		case "tldr":
-			return handlerTldr(update)
 		case "status":
 			return handlerStatus(update)
+		case "tldr":
+			return handlerTldr(update)
+		case "stamoce":
+			return handlerStamoce(update)
 		default:
 			log.Printf("Command %s has not been recognized. Nope.", update.Message.Command())
 		}
 	}
+	return nil
+}
+
+func handlerHelp(update tgbotapi.Update) error {
+	sendMessage(update.Message.Chat.ID, `Aò a manzo, eccote du seppie e ttre ppiovre de aiuto:
+	/help	l'hai usato mò a cojone, ma che sei frocio?
+	/tldr	azzì questo teggenera er tuloddonrì
+	/status	je chiedi mammamiacommestaaa
+	`)
+	return nil
+}
+
+func handlerStatus(update tgbotapi.Update) error {
+	ElevenLabsSubStatus := elevenlabs.GetSubscriptionStatus()
+	// TODO: get OpenAI usage with a request (see openai client.go)
+	sendMessage(update.Message.Chat.ID, ElevenLabsSubStatus)
 	return nil
 }
 
@@ -161,9 +179,49 @@ func handlerTldr(update tgbotapi.Update) error {
 	return nil
 }
 
+func handlerStamoce(update tgbotapi.Update) error {
+	rightNow := time.Now()
+
+	// Telegram supports only up to 10 options
+	pollChoices := []string{
+		rightNow.Weekday().String() + " sera",
+		rightNow.Add(time.Hour*24*1).Weekday().String() + " mattina",
+		rightNow.Add(time.Hour*24*1).Weekday().String() + " sera",
+		rightNow.Add(time.Hour*24*2).Weekday().String() + " mattina",
+		rightNow.Add(time.Hour*24*2).Weekday().String() + " sera",
+		rightNow.Add(time.Hour*24*3).Weekday().String() + " mattina",
+		rightNow.Add(time.Hour*24*3).Weekday().String() + " sera",
+		rightNow.Add(time.Hour*24*4).Weekday().String() + " mattina",
+		rightNow.Add(time.Hour*24*4).Weekday().String() + " sera",
+		utils.PickFromArray([]string{
+			"Sono calvo",
+			"Oh no, sono stato Matteato",
+			"Non mi sento bene, devo riposare",
+			"Sesso papà Gaetano",
+			"Corro nudo urlando per le strade di Napoli",
+			"Grottesco",
+			"Sasso",
+		}),
+	}
+
+	pollConfig := tgbotapi.SendPollConfig{
+		BaseChat: tgbotapi.BaseChat{
+			ChatID: update.Message.Chat.ID,
+		},
+		Question:              "Quanno ce stamo?",
+		Options:               pollChoices,
+		IsAnonymous:           false,
+		AllowsMultipleAnswers: true,
+		Explanation:           "t'o devo pure spiegà?",
+	}
+
+	tgclient.Send(pollConfig)
+	return nil
+}
+
 func handlerHelp(update tgbotapi.Update) error {
 	sendMessage(update.Message.Chat.ID, `Aò a manzo, eccote du seppie e ttre ppiovre de aiuto:
-	/help	l'hai usato mò a cojone, ma che sei frocio (come Matteo finto?)?
+	/help	l'hai usato mò a cojone, ma che sei frocio?
 	/tldr	azzì questo teggenera er tuloddonrì
 	/status	je chiedi mammamiacommestaaa
 	`)
