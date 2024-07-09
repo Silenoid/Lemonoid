@@ -33,7 +33,7 @@ var PROMPT_THEMES []string = []string{
 	"un discorso politico",
 	"un sermone fatto in chiesa",
 	"un romanzo rosa",
-	"un articolo scientifico",
+	"un articolo scientifico sofisticatissimo",
 	"una rivista di gossip",
 	"un canto della divina commedia",
 	"una poesia ermetica",
@@ -201,6 +201,10 @@ func handlerStamoce(update tgbotapi.Update) error {
 			"Corro nudo urlando per le strade di Napoli",
 			"Grottesco",
 			"Sasso",
+			"C'è la partita del Napoli",
+			"Simpo per Matteo Criccomoro",
+			"Preparo due crostate",
+			"Sono il Re dei Simp",
 		}),
 	}
 
