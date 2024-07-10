@@ -22,3 +22,4 @@ go.work
 
 /.temp
 /.idea
+test.db
