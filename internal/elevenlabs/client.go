@@ -31,7 +31,7 @@ func Initialize() {
 	elclient = elapi.NewClient(context.Background(), token, 30*time.Second)
 }
 
-func GenerateVoiceNarration(prompt string) (string, error) {
+func GenerateVoiceNarration(prompt string, pickedVoice string) (string, error) {
 	if len(token) == 0 {
 		panic("ElevenLabs token is not set")
 	}
@@ -42,7 +42,6 @@ func GenerateVoiceNarration(prompt string) (string, error) {
 			ModelID: "eleven_multilingual_v2",
 		}
 
-		pickedVoice := utils.PickFromArray(VOICES)
 		audio, err := elclient.TextToSpeech(pickedVoice, payload)
 		if err != nil {
 			log.Printf("Failing ElevenLabs call -> %v", err)

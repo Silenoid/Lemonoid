@@ -151,23 +151,29 @@ func handlerStatus(update tgbotapi.Update) error {
 
 func handlerTldr(update tgbotapi.Update) error {
 	chatHistory := history.GetChatHistory(update.Message.Chat.ID)
+	pickedPromptTheme := utils.PickFromArray(PROMPT_THEMES)
+	pickedVoice := utils.PickFromArray(elevenlabs.VOICES)
 
 	openAiPromptBuilder := strings.Builder{}
-	openAiPromptBuilder.WriteString("Genera un riassunto della seguente chat")
-	pickedPromptTheme := utils.PickFromArray(PROMPT_THEMES)
 	openAiPromptBuilder.WriteString("Genera un riassunto della seguente chat come se fosse ")
 	openAiPromptBuilder.WriteString(pickedPromptTheme)
-	openAiPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'grottesco':\n")
+	if pickedVoice == "IzoLtTXseyrunESwWmw3" { // Se è M TODO: definisci enum o tipo
+		openAiPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'devastaaaante':\n")
+	} else if pickedVoice == "i86lB8eIKMQcO470EIFz" { // Se è G
+		openAiPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'wagooooo':\n")
+	} else {
+		openAiPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'grottesco':\n")
+	}
 	openAiPromptBuilder.WriteString(chatHistory)
 	openAiPrompt := openAiPromptBuilder.String()
 
-	log.Printf("Prompt a tema '%s': %s", pickedPromptTheme, openAiPrompt)
+	log.Printf("Prompt a tema '%s' con voce '%s': %s", pickedPromptTheme, pickedVoice, openAiPrompt)
 	elevenLabsPrompt, err := openai.GenerateStory(openAiPrompt)
 	if err != nil {
 		return err
 	}
 
-	generatedAudioPath, err := elevenlabs.GenerateVoiceNarration(elevenLabsPrompt)
+	generatedAudioPath, err := elevenlabs.GenerateVoiceNarration(elevenLabsPrompt, pickedVoice)
 	if err != nil {
 		sendMessage(update.Message.Chat.ID, "Errore durante la generazione vocale: "+err.Error())
 		return err
