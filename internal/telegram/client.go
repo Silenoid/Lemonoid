@@ -180,19 +180,17 @@ func handlerTldr(update tgbotapi.Update) error {
 }
 
 func handlerStamoce(update tgbotapi.Update) error {
-	rightNow := time.Now()
-
 	// Telegram supports only up to 10 options
 	pollChoices := []string{
-		rightNow.Weekday().String() + " sera",
-		rightNow.Add(time.Hour*24*1).Weekday().String() + " mattina",
-		rightNow.Add(time.Hour*24*1).Weekday().String() + " sera",
-		rightNow.Add(time.Hour*24*2).Weekday().String() + " mattina",
-		rightNow.Add(time.Hour*24*2).Weekday().String() + " sera",
-		rightNow.Add(time.Hour*24*3).Weekday().String() + " mattina",
-		rightNow.Add(time.Hour*24*3).Weekday().String() + " sera",
-		rightNow.Add(time.Hour*24*4).Weekday().String() + " mattina",
-		rightNow.Add(time.Hour*24*4).Weekday().String() + " sera",
+		"Lunneddì sera",
+		"Marteddì sera",
+		"Mercoleddì sera",
+		"Gioveddì sera",
+		"Venerdì sera",
+		"Sabato mattina",
+		"Sabato sera",
+		"Domenica mattina",
+		"Domenica sera",
 		utils.PickFromArray([]string{
 			"Sono calvo",
 			"Oh no, sono stato Matteato",

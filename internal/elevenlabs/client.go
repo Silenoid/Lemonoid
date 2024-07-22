@@ -16,7 +16,8 @@ import (
 
 var VOICES []string = []string{
 	"i86lB8eIKMQcO470EIFz", // G
-	"d9Gr3L3YR4d9Sf9Gt8cV"} // S
+	"d9Gr3L3YR4d9Sf9Gt8cV", // S
+	"IzoLtTXseyrunESwWmw3"} // M
 const GENERATION_WAITING_PERIOD = time.Hour * 24
 
 var token string
