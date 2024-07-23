@@ -158,9 +158,9 @@ func handlerTldr(update tgbotapi.Update) error {
 	openAiPromptBuilder.WriteString("Genera un riassunto della seguente chat come se fosse ")
 	openAiPromptBuilder.WriteString(pickedPromptTheme)
 	if pickedVoice == "IzoLtTXseyrunESwWmw3" { // Se è M TODO: definisci enum o tipo
-		openAiPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'devastaaaante':\n")
+		openAiPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'devastaaaante' e facendo riferimenti alla cultura nipponica:\n")
 	} else if pickedVoice == "i86lB8eIKMQcO470EIFz" { // Se è G
-		openAiPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'wagooooo':\n")
+		openAiPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'wagooooo' ed annunciando un piatto di pasta da cucinare:\n")
 	} else {
 		openAiPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'grottesco':\n")
 	}
