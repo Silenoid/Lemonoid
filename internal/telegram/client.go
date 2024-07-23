@@ -157,13 +157,18 @@ func handlerTldr(update tgbotapi.Update) error {
 	openAiPromptBuilder := strings.Builder{}
 	openAiPromptBuilder.WriteString("Genera un riassunto della seguente chat come se fosse ")
 	openAiPromptBuilder.WriteString(pickedPromptTheme)
-	if pickedVoice == "IzoLtTXseyrunESwWmw3" { // Se è M TODO: definisci enum o tipo
-		openAiPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'devastaaaante' e facendo riferimenti alla cultura nipponica:\n")
-	} else if pickedVoice == "i86lB8eIKMQcO470EIFz" { // Se è G
-		openAiPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'wagooooo' ed annunciando un piatto di pasta da cucinare:\n")
-	} else {
+
+	switch pickedVoice {
+	case "IzoLtTXseyrunESwWmw3": // Se è M TODO: definisci enum o tipo
+		openAiPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'devastaaaante' e facendo paragoni col Giappone:\n")
+	case "i86lB8eIKMQcO470EIFz": // // Se è G
+		openAiPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'wagooooo' ed annunciando, alla fine, un piatto di pasta da cucinare:\n")
+	case "d9Gr3L3YR4d9Sf9Gt8cV": // Se è S
+		openAiPromptBuilder.WriteString(", utilizzando almeno una volta ciascuno i termini 'non ironicamente', 'cringe' e 'è tutta colpa di Enzo':\n")
+	default:
 		openAiPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'grottesco':\n")
 	}
+
 	openAiPromptBuilder.WriteString(chatHistory)
 	openAiPrompt := openAiPromptBuilder.String()
 
