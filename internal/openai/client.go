@@ -35,6 +35,7 @@ func GenerateStory(prompt string) (string, error) {
 					Content: prompt,
 				},
 			},
+			Temperature: 1.5,
 		},
 	)
 
