@@ -28,14 +28,15 @@ func GenerateStory(prompt string) (string, error) {
 	resp, err := openaiclient.CreateChatCompletion(
 		context.Background(),
 		openaiapi.ChatCompletionRequest{
-			Model: OPENAI_MODEL,
+			Model:     OPENAI_MODEL,
+			MaxTokens: 150,
 			Messages: []openaiapi.ChatCompletionMessage{
 				{
 					Role:    openaiapi.ChatMessageRoleUser,
 					Content: prompt,
 				},
 			},
-			Temperature: 1.5,
+			Temperature: 1.2,
 		},
 	)
 
