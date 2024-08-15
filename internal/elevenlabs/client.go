@@ -14,10 +14,30 @@ import (
 	elapi "github.com/haguro/elevenlabs-go"
 )
 
-var VOICES []string = []string{
+var CLONED_VOICES []string = []string{
 	"i86lB8eIKMQcO470EIFz", // G
 	"d9Gr3L3YR4d9Sf9Gt8cV", // S
 	"IzoLtTXseyrunESwWmw3"} // M
+
+var BASIC_VOICES []string = []string{
+	"EXAVITQu4vr4xnSDxMaL",
+	"FGY2WhTYpPnrIDTdsKH5",
+	"IKne3meq5aSn9XLyUdCD",
+	"JBFqnCBsd6RMkjVDRZzb",
+	"N2lVS1w4EtoT3dr4eOWO",
+	"TX3LPaxmHKxFdv7VOQHJ",
+	"XB0fDUnXU5powFXDhCwa",
+	"Xb7hH8MSUJpSbSDYk0k2",
+	"XrExE9yKIg1WjnnlVkGX",
+	"bIHbv24MWmeRgasZH58o",
+	"cgSgspJ2msm6clMCkdW9",
+	"cjVigY5qzO86Huf0OWal",
+	"iP95p4xoKVk53GoZ742B",
+	"nPczCjzI2devNBz1zQrb",
+	"onwK4e9ZLuTAKqWW03F9",
+	"pFZP5JQG7iQjIQuC4Bku",
+	"pqHfZKP75CvOlQylNhV4"}
+
 const GENERATION_WAITING_PERIOD = time.Hour * 24
 
 var token string

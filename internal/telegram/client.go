@@ -152,7 +152,7 @@ func handlerStatus(update tgbotapi.Update) error {
 func handlerTldr(update tgbotapi.Update) error {
 	chatHistory := history.GetChatHistory(update.Message.Chat.ID)
 	pickedPromptTheme := utils.PickFromArray(PROMPT_THEMES)
-	pickedVoice := utils.PickFromArray(elevenlabs.VOICES)
+	pickedVoice := utils.PickFromArray(elevenlabs.BASIC_VOICES)
 
 	openAiPromptBuilder := strings.Builder{}
 	openAiPromptBuilder.WriteString("Genera un riassunto della seguente chat come se fosse ")
