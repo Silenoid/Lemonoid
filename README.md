@@ -21,3 +21,7 @@ Run all tests:
 ```bash
 go test ./...
 ```
+
+# TODO
+- [Persistance with Redis](https://redis.io/docs/latest/develop/connect/clients/go/)
+- Use better Telegram bot client (that supports topic and more modern features)

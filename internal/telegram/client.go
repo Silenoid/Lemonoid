@@ -28,8 +28,6 @@ var PROMPT_THEMES []string = []string{
 	"una missiva in epoca medievale",
 	"un antico editto romano",
 	"una storia dell'orrore",
-	"un racconto in un linguaggio grezzo primitivo",
-	"una pagina di un diario segreto, cominciando con \"Caro diario\"",
 	"un discorso politico",
 	"un sermone fatto in chiesa",
 	"un romanzo rosa",
@@ -38,6 +36,12 @@ var PROMPT_THEMES []string = []string{
 	"un canto della divina commedia",
 	"una poesia ermetica",
 	"un libro per bambini",
+	"il cronista di una partita di calcio",
+	"un elogio funebre ad un funerale",
+	"uno spot pubblicitario",
+	"un riassunto delle puntate precedenti",
+	"un triste ed angosciante racconto sovietico",
+	"un passo della Bibbia",
 }
 
 func Initialize(isDebugging bool) {
