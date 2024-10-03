@@ -156,7 +156,9 @@ func handlerStatus(update tgbotapi.Update) error {
 func handlerTldr(update tgbotapi.Update) error {
 	chatHistory := history.GetChatHistory(update.Message.Chat.ID)
 	pickedPromptTheme := utils.PickFromArray(PROMPT_THEMES)
-	pickedVoice := utils.PickFromArray(elevenlabs.BASIC_VOICES)
+	// pickedVoice := utils.PickFromArray(elevenlabs.BASIC_VOICES)
+	// Impose G Maronne
+	pickedVoice := "ml5JfpB48j688Rpbbz2M"
 
 	openAiPromptBuilder := strings.Builder{}
 	openAiPromptBuilder.WriteString("Genera un riassunto della seguente chat come se fosse ")
@@ -165,7 +167,7 @@ func handlerTldr(update tgbotapi.Update) error {
 	switch pickedVoice {
 	case "IzoLtTXseyrunESwWmw3": // Se è M TODO: definisci enum o tipo
 		openAiPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'devastaaaante' e facendo paragoni col Giappone:\n")
-	case "i86lB8eIKMQcO470EIFz": // // Se è G
+	case "i86lB8eIKMQcO470EIFz", "ml5JfpB48j688Rpbbz2M": // // Se è G o G Maronne
 		openAiPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'wagooooo' ed annunciando, alla fine, un piatto di pasta da cucinare:\n")
 	case "d9Gr3L3YR4d9Sf9Gt8cV": // Se è S
 		openAiPromptBuilder.WriteString(", utilizzando almeno una volta ciascuno i termini 'non ironicamente', 'cringe' e 'è tutta colpa di Enzo':\n")

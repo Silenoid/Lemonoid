@@ -16,6 +16,7 @@ import (
 
 var CLONED_VOICES []string = []string{
 	"i86lB8eIKMQcO470EIFz", // G
+	"ml5JfpB48j688Rpbbz2M", // G Maronne
 	"d9Gr3L3YR4d9Sf9Gt8cV", // S
 	"IzoLtTXseyrunESwWmw3"} // M
 
