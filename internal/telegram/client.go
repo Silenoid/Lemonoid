@@ -58,7 +58,7 @@ func Initialize(isDebugging bool) {
 	tgclient.Debug = isDebugging
 
 	startTime = time.Now()
-	sendMessage(CHATID_LORD, "Lemonoid awakened at "+startTime.String())
+	sendMessage(CHATID_LORD, "Lemonoid awakened at "+utils.ToReadableDate(startTime))
 }
 
 func Listen() {
@@ -193,6 +193,7 @@ func handlerTldr(update tgbotapi.Update) error {
 	sendMessage(update.Message.Chat.ID, "Tema utilizzato per il prompt: "+pickedPromptTheme)
 	sendAudio(update.Message.Chat.ID, generatedAudioPath)
 	sendMessage(CHATID_LORD, "Generated story:\n"+elevenLabsPrompt)
+	sendAudio(CHATID_LORD, generatedAudioPath)
 	return nil
 }
 

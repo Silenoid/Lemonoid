@@ -43,7 +43,7 @@ const GENERATION_WAITING_PERIOD = time.Hour * 24
 
 var token string
 var elclient *elapi.Client
-var lastGeneratedAudio time.Time
+var lastGeneratedAudioTime time.Time
 var isFirstGeneration = false
 
 func Initialize() {
@@ -57,7 +57,7 @@ func GenerateVoiceNarration(prompt string, pickedVoice string) (string, error) {
 		panic("ElevenLabs token is not set")
 	}
 
-	if isFirstGeneration || time.Now().After(lastGeneratedAudio.Add(GENERATION_WAITING_PERIOD)) {
+	if isFirstGeneration || time.Now().After(lastGeneratedAudioTime.Add(GENERATION_WAITING_PERIOD)) {
 		payload := elapi.TextToSpeechRequest{
 			Text:    prompt,
 			ModelID: "eleven_multilingual_v2",
@@ -68,11 +68,11 @@ func GenerateVoiceNarration(prompt string, pickedVoice string) (string, error) {
 			log.Printf("Failing ElevenLabs call -> %v", err)
 		}
 
-		lastGeneratedAudio = time.Now()
+		lastGeneratedAudioTime = time.Now()
 		isFirstGeneration = false
 
 		audioTitle := MakeAudioTitle(prompt)
-		generatedAudioFilename := audioTitle + "-" + strconv.FormatInt(lastGeneratedAudio.UnixMilli(), 10) + ".mp3"
+		generatedAudioFilename := audioTitle + "-" + strconv.FormatInt(lastGeneratedAudioTime.UnixMilli(), 10) + ".mp3"
 		generatedAudioDir := filepath.Join(".temp", "elevenlabs_generated")
 		generatedAudioCompletePath := filepath.Join(generatedAudioDir, generatedAudioFilename)
 
@@ -86,7 +86,7 @@ func GenerateVoiceNarration(prompt string, pickedVoice string) (string, error) {
 
 		return generatedAudioCompletePath, nil
 	} else {
-		return "", errors.New("not enough time (" + time.Since(lastGeneratedAudio).String() + ") has passed since the last generated audio. Wait for " + GENERATION_WAITING_PERIOD.String())
+		return "", errors.New("A cojò, li mortacci stracci tua ma che me voj rovinà? So ppasati solo " + utils.ToReadableSince(time.Now(), lastGeneratedAudioTime) + " da nantro vocale. Statte bbono pe' n'antri " + utils.ToReadableHowLongTo(time.Now(), lastGeneratedAudioTime, GENERATION_WAITING_PERIOD))
 	}
 }
 
