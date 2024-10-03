@@ -248,7 +248,7 @@ func sendAudio(chatId int64, audioPath string) {
 		forwardMsg := tgbotapi.NewForward(CHATID_LORD, sentMessage.Chat.ID, sentMessage.MessageID)
 		tgclient.Send(forwardMsg)
 	} else {
-		log.Printf("Couldn't forward the message with audio %s", audioPath)
+		log.Printf("Couldn't forward the message with audio %s.\n%v", audioPath, err)
 	}
 }
 
