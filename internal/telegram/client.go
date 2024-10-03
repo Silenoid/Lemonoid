@@ -168,7 +168,7 @@ func handlerTldr(update tgbotapi.Update) error {
 	case "IzoLtTXseyrunESwWmw3": // Se è M TODO: definisci enum o tipo
 		openAiPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'devastaaaante' e facendo paragoni col Giappone:\n")
 	case "i86lB8eIKMQcO470EIFz", "ml5JfpB48j688Rpbbz2M": // // Se è G o G Maronne
-		openAiPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'wagooooo' ed annunciando, alla fine, un piatto di pasta da cucinare:\n")
+		openAiPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'WAGOOOOO' ed concludendo, alla fine, suggerendo un piatto a base di pasta da cucinare:\n")
 	case "d9Gr3L3YR4d9Sf9Gt8cV": // Se è S
 		openAiPromptBuilder.WriteString(", utilizzando almeno una volta ciascuno i termini 'non ironicamente', 'cringe' e 'è tutta colpa di Enzo':\n")
 	default:
@@ -193,7 +193,6 @@ func handlerTldr(update tgbotapi.Update) error {
 	sendMessage(update.Message.Chat.ID, "Tema utilizzato per il prompt: "+pickedPromptTheme)
 	sendAudio(update.Message.Chat.ID, generatedAudioPath)
 	sendMessage(CHATID_LORD, "Generated story:\n"+elevenLabsPrompt)
-	sendAudio(CHATID_LORD, generatedAudioPath)
 	return nil
 }
 
@@ -242,7 +241,15 @@ func handlerStamoce(update tgbotapi.Update) error {
 func sendAudio(chatId int64, audioPath string) {
 	audioFile := tgbotapi.FilePath(audioPath)
 	msg := tgbotapi.NewAudio(chatId, audioFile)
-	tgclient.Send(msg)
+
+	sentMessage, err := tgclient.Send(msg)
+
+	if err != nil {
+		forwardMsg := tgbotapi.NewForward(CHATID_LORD, sentMessage.Chat.ID, sentMessage.MessageID)
+		tgclient.Send(forwardMsg)
+	} else {
+		log.Printf("Couldn't forward the message with audio %s", audioPath)
+	}
 }
 
 func sendMessage(chatId int64, text string) {
