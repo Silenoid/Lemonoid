@@ -168,7 +168,7 @@ func handlerTldr(update tgbotapi.Update) error {
 	case "IzoLtTXseyrunESwWmw3": // Se è M TODO: definisci enum o tipo
 		openAiPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'devastaaaante' e facendo paragoni col Giappone:\n")
 	case "i86lB8eIKMQcO470EIFz", "ml5JfpB48j688Rpbbz2M": // // Se è G o G Maronne
-		openAiPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'WAGOOOOO' ed concludendo, alla fine, suggerendo un piatto a base di pasta da cucinare:\n")
+		openAiPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'WAGOOOOO' ed concludendo, alla fine, suggerendo un piatto di pasta insolito da cucinare:\n")
 	case "d9Gr3L3YR4d9Sf9Gt8cV": // Se è S
 		openAiPromptBuilder.WriteString(", utilizzando almeno una volta ciascuno i termini 'non ironicamente', 'cringe' e 'è tutta colpa di Enzo':\n")
 	default:
