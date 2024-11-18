@@ -22,7 +22,6 @@ var CHATID_CHICECE int64 = -1001623264158
 var PROMPT_THEMES []string = []string{
 	"una avventura fantastica",
 	"una lettera scritta in epoca vittoriana",
-	"una sceneggiatura di uno spettacolo comico",
 	"una storia di Natale",
 	"un vecchio articolo di giornale",
 	"una missiva in epoca medievale",
@@ -31,7 +30,6 @@ var PROMPT_THEMES []string = []string{
 	"un discorso politico",
 	"un sermone fatto in chiesa",
 	"un romanzo rosa",
-	"un articolo scientifico sofisticatissimo",
 	"una rivista di gossip",
 	"un canto della divina commedia",
 	"una poesia ermetica",
@@ -42,6 +40,7 @@ var PROMPT_THEMES []string = []string{
 	"un riassunto delle puntate precedenti",
 	"un triste ed angosciante racconto sovietico",
 	"un passo della Bibbia",
+	"un discorso fra Gen Z in un linguaggio dank contenente frequenti riferimenti a meme",
 }
 
 func Initialize(isDebugging bool) {
