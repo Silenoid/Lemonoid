@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Silenoid/Lemonoid/internal/utils"
@@ -66,6 +67,10 @@ func GenerateVoiceNarration(prompt string, pickedVoice string) (string, error) {
 		audio, err := elclient.TextToSpeech(pickedVoice, payload)
 		if err != nil {
 			log.Printf("Failing ElevenLabs call -> %v", err)
+			if strings.Contains(err.Error(), "exceeds your quota") {
+				return "", errors.New("Aò, a' Serpico de li mejo parenti stretti senza li bbraghe, qua ElevenLabs ha fatto er vento. E cacciali sti ddù spicci pe' famme generà l'audio. Mannacele ar pelato si voj.")
+			}
+			return "", errors.New("Se vede che quarcosa non va ccò UnniciLabboradorio. Tiè un po' qua e vedi se capisci te che sei imparato: " + err.Error())
 		}
 
 		lastGeneratedAudioTime = time.Now()
