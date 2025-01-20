@@ -9,7 +9,7 @@ import (
 	openaiapi "github.com/sashabaranov/go-openai"
 )
 
-const OPENAI_MODEL = openaiapi.GPT3Dot5Turbo
+const OPENAI_MODEL = openaiapi.GPT4oMini
 
 var token string
 var openaiclient *openaiapi.Client
@@ -29,14 +29,14 @@ func GenerateStory(prompt string) (string, error) {
 		context.Background(),
 		openaiapi.ChatCompletionRequest{
 			Model:     OPENAI_MODEL,
-			MaxTokens: 300,
+			MaxTokens: 150,
 			Messages: []openaiapi.ChatCompletionMessage{
 				{
 					Role:    openaiapi.ChatMessageRoleUser,
 					Content: prompt,
 				},
 			},
-			Temperature: 1.4,
+			Temperature: 1.0,
 		},
 	)
 
