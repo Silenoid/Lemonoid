@@ -14,7 +14,7 @@ func LoadEnvVars() {
 	TokenTelegram = GetAndValidateEnvVar("LEMONOID_TOKEN_TELEGRAM")
 	TokenOpenAi = GetAndValidateEnvVar("LEMONOID_TOKEN_OPENAI")
 	TokenElevenLabs = GetAndValidateEnvVar("LEMONOID_TOKEN_ELEVENLABS")
-	// TokenDiscord = GetAndValidateEnvVar("LEMONOID_TOKEN_DISCORD")
+	TokenDiscord = GetAndValidateEnvVar("LEMONOID_TOKEN_DISCORD")
 }
 
 func GetAndValidateEnvVar(envVarName string) string {
