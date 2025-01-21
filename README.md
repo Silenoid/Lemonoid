@@ -7,6 +7,7 @@ The following environment variables are expected at startup:
 | LEMONOID_TOKEN_TELEGRAM | Telegram bot token |
 | LEMONOID_TOKEN_OPENAI | OpenAi token |
 | LEMONOID_TOKEN_ELEVENLABS | ElevenLabs token |
+| LEMONOID_TOKEN_DISCORD | Discord token |
 
 # Running
 Run the application:
