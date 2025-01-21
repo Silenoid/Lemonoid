@@ -2,6 +2,7 @@ package discord
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -47,6 +48,7 @@ func Initialize() {
 // This function will be called (due to AddHandler above) every time a new
 // message is created on any channel that the authenticated bot has access to.
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
+	log.Printf("[Discord client] %s says: %s", m.Author.ID, m.Content)
 
 	// Ignore all messages created by the bot itself
 	// This isn't required in this specific example but it's a good practice.
