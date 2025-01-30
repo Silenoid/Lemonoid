@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/Silenoid/Lemonoid/internal/discord"
 	"github.com/Silenoid/Lemonoid/internal/elevenlabs"
 	"github.com/Silenoid/Lemonoid/internal/openai"
 	"github.com/Silenoid/Lemonoid/internal/telegram"
@@ -15,7 +14,7 @@ func main() {
 	telegram.Initialize(false)
 	openai.Initialize()
 	elevenlabs.Initialize()
-	discord.Initialize()
+	// discord.Initialize()
 
 	telegram.Listen()
 }
