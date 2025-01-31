@@ -57,7 +57,7 @@ func Initialize(isDebugging bool) {
 	tgclient.Debug = isDebugging
 
 	startTime = time.Now()
-	sendMessage(CHATID_LORD, "Lemonoid awakened at "+utils.ToReadableDate(startTime))
+	SendMessage(CHATID_LORD, "Lemonoid awakened at "+utils.ToReadableDate(startTime))
 }
 
 func Listen() {
@@ -137,7 +137,7 @@ func processAndDispatch(update tgbotapi.Update) error {
 }
 
 func handlerHelp(update tgbotapi.Update) error {
-	sendMessage(update.Message.Chat.ID, `Aò a manzo, eccote du seppie e ttre ppiovre de aiuto:
+	SendMessage(update.Message.Chat.ID, `Aò a manzo, eccote du seppie e ttre ppiovre de aiuto:
 	/help	l'hai usato mò a cojone, ma che sei frocio?
 	/tldr	azzì questo teggenera er tuloddonrì
 	/status	je chiedi mammamiacommestaaa
@@ -148,7 +148,7 @@ func handlerHelp(update tgbotapi.Update) error {
 func handlerStatus(update tgbotapi.Update) error {
 	ElevenLabsSubStatus := elevenlabs.GetSubscriptionStatus()
 	// TODO: get OpenAI usage with a request (see openai client.go)
-	sendMessage(update.Message.Chat.ID, ElevenLabsSubStatus)
+	SendMessage(update.Message.Chat.ID, ElevenLabsSubStatus)
 	return nil
 }
 
@@ -185,13 +185,13 @@ func handlerTldr(update tgbotapi.Update) error {
 
 	generatedAudioPath, err := elevenlabs.GenerateVoiceNarration(elevenLabsPrompt, pickedVoice)
 	if err != nil {
-		sendMessage(update.Message.Chat.ID, "Errore durante la generazione vocale: "+err.Error())
+		SendMessage(update.Message.Chat.ID, "Errore durante la generazione vocale: "+err.Error())
 		return err
 	}
 
-	sendMessage(update.Message.Chat.ID, "Tema utilizzato per il prompt: "+pickedPromptTheme)
+	SendMessage(update.Message.Chat.ID, "Tema utilizzato per il prompt: "+pickedPromptTheme)
 	sendAudio(update.Message.Chat.ID, generatedAudioPath)
-	sendMessage(CHATID_LORD, "Generated story:\n"+elevenLabsPrompt)
+	SendMessage(CHATID_LORD, "Generated story:\n"+elevenLabsPrompt)
 	return nil
 }
 
@@ -251,7 +251,7 @@ func sendAudio(chatId int64, audioPath string) {
 	}
 }
 
-func sendMessage(chatId int64, text string) {
+func SendMessage(chatId int64, text string) {
 	msg := tgbotapi.NewMessage(chatId, text)
 	tgclient.Send(msg)
 }

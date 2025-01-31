@@ -7,25 +7,51 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/Silenoid/Lemonoid/internal/telegram"
 	"github.com/Silenoid/Lemonoid/internal/utils"
 	"github.com/bwmarrin/discordgo"
 )
 
-var token string
+const GUILD_ID = "830811876761010196"
 
 func Initialize() {
-
 	var token = utils.TokenElevenLabs
 	discordClient, err := discordgo.New("Bot " + token)
 	if err != nil {
-		fmt.Println("Discord client: error creating Discord session,", err)
+		log.Printf("[Discord client] Error creating Discord session: %s", err)
 		return
 	}
 
-	// Register the messageCreate func as a callback for MessageCreate events.
-	discordClient.AddHandler(messageCreate)
+	// Called every time a new message is created on any guild that the authenticated bot has access to
+	discordClient.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
+		log.Printf("[Discord client] %s says: %s", m.Author.ID, m.Content)
 
-	// In this example, we only care about receiving message events.
+		// Ignore all messages created by the bot itself
+		if m.Author.ID == s.State.User.ID {
+			return
+		}
+		if m.Content == "ping" {
+			s.ChannelMessageSend(m.ChannelID, "Pong!")
+		} else if m.Content == "pong" {
+			s.ChannelMessageSend(m.ChannelID, "Ping!")
+		}
+	})
+
+	// Called every time an event is related to a voice chat
+	discordClient.AddHandler(func(s *discordgo.Session, event *discordgo.VoiceStateUpdate) {
+		guild, err := s.State.Guild(GUILD_ID)
+		if err != nil {
+			log.Printf("[Discord client] Error fetching guild: %s", err)
+			return
+		}
+
+		if len(guild.VoiceStates) > 0 {
+			telegram.SendMessage(telegram.CHATID_LORD, "ao anvedi")
+		}
+
+	})
+
+	// We only care about receiving message events.
 	discordClient.Identify.Intents = discordgo.IntentsAllWithoutPrivileged
 
 	// Open a websocket connection to Discord and begin listening.
@@ -43,25 +69,4 @@ func Initialize() {
 
 	// Cleanly close down the Discord session.
 	discordClient.Close()
-}
-
-// This function will be called (due to AddHandler above) every time a new
-// message is created on any channel that the authenticated bot has access to.
-func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
-	log.Printf("[Discord client] %s says: %s", m.Author.ID, m.Content)
-
-	// Ignore all messages created by the bot itself
-	// This isn't required in this specific example but it's a good practice.
-	if m.Author.ID == s.State.User.ID {
-		return
-	}
-	// If the message is "ping" reply with "Pong!"
-	if m.Content == "ping" {
-		s.ChannelMessageSend(m.ChannelID, "Pong!")
-	}
-
-	// If the message is "pong" reply with "Ping!"
-	if m.Content == "pong" {
-		s.ChannelMessageSend(m.ChannelID, "Ping!")
-	}
 }
