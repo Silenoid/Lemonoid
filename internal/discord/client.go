@@ -15,7 +15,7 @@ import (
 const GUILD_ID = "830811876761010196"
 
 func Initialize() {
-	var token = utils.TokenElevenLabs
+	var token = utils.TokenDiscord
 	discordClient, err := discordgo.New("Bot " + token)
 	if err != nil {
 		log.Printf("[Discord client] Error creating Discord session: %s", err)
