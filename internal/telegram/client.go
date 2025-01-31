@@ -70,6 +70,8 @@ func Listen() {
 	updatesChannel := tgclient.GetUpdatesChan(updateConfig)
 	updatesChannel.Clear()
 
+	log.Println("[Telegram client] Telegram client is listening...")
+
 	for update := range updatesChannel {
 
 		if update.Message != nil {

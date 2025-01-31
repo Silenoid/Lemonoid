@@ -18,4 +18,5 @@ func main() {
 	discord.Initialize()
 
 	telegram.Listen()
+	discord.Listen()
 }
