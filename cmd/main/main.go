@@ -17,6 +17,6 @@ func main() {
 	elevenlabs.Initialize()
 	discord.Initialize()
 
-	telegram.Listen()
 	discord.Listen()
+	telegram.Listen()
 }
