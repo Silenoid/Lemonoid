@@ -12,7 +12,7 @@ func main() {
 	utils.PrintWelcome()
 	utils.LoadEnvVars()
 
-	telegram.Initialize(false)
+	telegram.Initialize()
 	openai.Initialize()
 	elevenlabs.Initialize()
 	discord.Initialize()

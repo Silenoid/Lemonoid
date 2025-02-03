@@ -1,7 +1,10 @@
 package telegram
 
 import (
+	"context"
 	"log"
+	"os"
+	"os/signal"
 	"strings"
 	"time"
 
@@ -9,11 +12,13 @@ import (
 	"github.com/Silenoid/Lemonoid/internal/history"
 	"github.com/Silenoid/Lemonoid/internal/openai"
 	"github.com/Silenoid/Lemonoid/internal/utils"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/go-telegram/bot"
+	"github.com/go-telegram/bot/models"
 )
 
 var token string
-var tgclient *tgbotapi.BotAPI
+var tgClient *bot.Bot
+var bgCtx context.Context
 var startTime time.Time
 
 var CHATID_LORD int64 = 449697032
@@ -43,21 +48,46 @@ var PROMPT_THEMES []string = []string{
 	"un discorso fra Gen Z in un linguaggio dank contenente frequenti riferimenti a meme",
 }
 
-func Initialize(isDebugging bool) {
+func Initialize() {
 	token = utils.TokenTelegram
 
-	tgbot, err := tgbotapi.NewBotAPI(token)
+	customOptions := []bot.Option{
+		bot.WithDefaultHandler(defaultHandler),
+		// bot.WithDebug(),
+	}
+
+	telegramBot, err := bot.New(token, customOptions...)
 	if err != nil {
 		log.Panic("Error during bot initialization -> ", err)
 	}
 
-	tgclient = tgbot
-	log.Println("Telegram bot client authorized under the account " + tgclient.Self.UserName)
+	backgroundContext, interruptCallback := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer interruptCallback()
 
-	tgclient.Debug = isDebugging
+	bgCtx = backgroundContext
+	tgClient = telegramBot
+
+	tgClient.Start(bgCtx)
 
 	startTime = time.Now()
 	SendMessage(CHATID_LORD, "Lemonoid awakened at "+utils.ToReadableDate(startTime))
+}
+
+func defaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+	if update.Message != nil {
+		b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: update.Message.Chat.ID,
+			Text:   update.Message.Text,
+		})
+	}
+
+	params := &bot.SendPhotoParams{
+		ChatID:  update.Message.Chat.ID,
+		Photo:   &models.InputFileString{Data: "AgACAgIAAxkDAAIBOWJimnCJHQJiJ4P3aasQCPNyo6mlAALDuzEbcD0YSxzjB-vmkZ6BAQADAgADbQADJAQ"},
+		Caption: "Preloaded Facebook logo",
+	}
+
+	b.SendPhoto(ctx, params)
 }
 
 func Listen() {
@@ -67,7 +97,7 @@ func Listen() {
 
 	updateConfig := tgbotapi.NewUpdate(0)
 	updateConfig.Timeout = 60
-	updatesChannel := tgclient.GetUpdatesChan(updateConfig)
+	updatesChannel := tgClient.GetUpdatesChan(updateConfig)
 	updatesChannel.Clear()
 
 	log.Println("[Telegram client] Telegram client is listening...")
@@ -235,7 +265,7 @@ func handlerStamoce(update tgbotapi.Update) error {
 		Explanation:           "t'o devo pure spiegà?",
 	}
 
-	tgclient.Send(pollConfig)
+	tgClient.Send(pollConfig)
 	return nil
 }
 
@@ -243,17 +273,21 @@ func sendAudio(chatId int64, audioPath string) {
 	audioFile := tgbotapi.FilePath(audioPath)
 	msg := tgbotapi.NewAudio(chatId, audioFile)
 
-	sentMessage, err := tgclient.Send(msg)
+	sentMessage, err := tgClient.Send(msg)
 
 	if err != nil && strings.Contains(err.Error(), "nil") {
 		forwardMsg := tgbotapi.NewForward(CHATID_LORD, sentMessage.Chat.ID, sentMessage.MessageID)
-		tgclient.Send(forwardMsg)
+		tgClient.Send(forwardMsg)
 	} else {
 		log.Printf("Couldn't forward the message with audio %s.\n%v", audioPath, err)
 	}
 }
 
 func SendMessage(chatId int64, text string) {
-	msg := tgbotapi.NewMessage(chatId, text)
-	tgclient.Send(msg)
+	params := &bot.SendMessageParams{
+		ChatID: chatId,
+		Text:   text,
+	}
+
+	tgClient.SendMessage(bgCtx, params)
 }
