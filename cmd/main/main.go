@@ -14,6 +14,7 @@ func main() {
 
 	telegram.Initialize()
 	openai.Initialize()
+	// gemini.Initialize()
 	elevenlabs.Initialize()
 	discord.Initialize()
 

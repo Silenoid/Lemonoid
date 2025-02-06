@@ -9,12 +9,14 @@ var TokenTelegram string
 var TokenOpenAi string
 var TokenElevenLabs string
 var TokenDiscord string
+var TokenGemini string
 
 func LoadEnvVars() {
 	TokenTelegram = GetAndValidateEnvVar("LEMONOID_TOKEN_TELEGRAM")
 	TokenOpenAi = GetAndValidateEnvVar("LEMONOID_TOKEN_OPENAI")
 	TokenElevenLabs = GetAndValidateEnvVar("LEMONOID_TOKEN_ELEVENLABS")
 	TokenDiscord = GetAndValidateEnvVar("LEMONOID_TOKEN_DISCORD")
+	TokenGemini = GetAndValidateEnvVar("LEMONOID_TOKEN_GEMINI")
 }
 
 func GetAndValidateEnvVar(envVarName string) string {
@@ -22,7 +24,7 @@ func GetAndValidateEnvVar(envVarName string) string {
 	if exists {
 		return value
 	} else {
-		panic("Exiting due to missing environment variable " + envVarName)
+		panic("Exiting due to missing environment variable: " + envVarName)
 	}
 }
 
