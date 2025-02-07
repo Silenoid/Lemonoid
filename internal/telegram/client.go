@@ -26,6 +26,11 @@ var startTime time.Time
 var CHATID_LORD int64 = 449697032
 var CHATID_CHICECE int64 = -1001623264158
 
+const TLDR_WAIT_TIME = time.Hour * 24
+
+var lastTLDRTime time.Time
+var isFirstTLDR = false
+
 var PROMPT_THEMES []string = []string{
 	"una avventura fantastica",
 	"una lettera scritta in epoca vittoriana",
@@ -189,6 +194,11 @@ func handlerStatus(update *models.Update) error {
 }
 
 func handlerTldr(update *models.Update) error {
+	if !isFirstTLDR && time.Now().Before(lastTLDRTime.Add(TLDR_WAIT_TIME)) {
+		SendMessage(update.Message.Chat.ID, "A cojò, li mortacci stracci tua ma che me voj rovinà? So ppasati solo "+utils.ToReadableSince(time.Now(), lastTLDRTime)+" da nantro vocale. Statte bbono pe' n'antri "+utils.ToReadableHowLongTo(time.Now(), lastTLDRTime, TLDR_WAIT_TIME))
+		return nil
+	}
+
 	chatHistory := history.GetChatHistory(update.Message.Chat.ID)
 	pickedPromptTheme := utils.PickFromArray(PROMPT_THEMES)
 	// pickedVoice := utils.PickFromArray(elevenlabs.BASIC_VOICES)
@@ -214,6 +224,8 @@ func handlerTldr(update *models.Update) error {
 	llmPrompt := llmPromptBuilder.String()
 
 	log.Printf("Prompt a tema '%s' con voce '%s': %s", pickedPromptTheme, pickedVoice, llmPrompt)
+	SendMessage(update.Message.Chat.ID, "Tema utilizzato per il prompt: "+pickedPromptTheme)
+
 	generatedStory, err := gemini.GenerateStory(llmPrompt)
 	if err != nil {
 		if strings.Contains(update.Message.Text, "exceeded your current quota") {
@@ -223,13 +235,15 @@ func handlerTldr(update *models.Update) error {
 		return err
 	}
 
+	lastTLDRTime = time.Now()
+	isFirstTLDR = false
+
 	generatedAudioPath, err := elevenlabs.GenerateVoiceNarration(generatedStory, pickedVoice)
 	if err != nil {
-		SendMessage(update.Message.Chat.ID, "Errore nella generazione vocale, dunque beccate solo er testo generato e muto:/n"+generatedStory)
+		SendMessage(update.Message.Chat.ID, "Errore nella generazione vocale, dunque beccate solo er testo generato e muto:\n"+generatedStory)
 		return err
 	}
 
-	SendMessage(update.Message.Chat.ID, "Tema utilizzato per il prompt: "+pickedPromptTheme)
 	sendAudio(update.Message.Chat.ID, generatedAudioPath)
 	SendMessage(CHATID_LORD, "Generated story:\n"+generatedStory)
 	return nil

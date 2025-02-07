@@ -40,12 +40,8 @@ var BASIC_VOICES []string = []string{
 	"pFZP5JQG7iQjIQuC4Bku",
 	"pqHfZKP75CvOlQylNhV4"}
 
-const GENERATION_WAITING_PERIOD = time.Hour * 24
-
 var token string
 var elclient *elapi.Client
-var lastGeneratedAudioTime time.Time
-var isFirstGeneration = false
 
 func Initialize() {
 	token = utils.TokenElevenLabs
@@ -58,41 +54,34 @@ func GenerateVoiceNarration(prompt string, pickedVoice string) (string, error) {
 		panic("ElevenLabs token is not set")
 	}
 
-	if isFirstGeneration || time.Now().After(lastGeneratedAudioTime.Add(GENERATION_WAITING_PERIOD)) {
-		payload := elapi.TextToSpeechRequest{
-			Text:    prompt,
-			ModelID: "eleven_multilingual_v2",
-		}
-
-		audio, err := elclient.TextToSpeech(pickedVoice, payload)
-		if err != nil {
-			log.Printf("Failing ElevenLabs call -> %v", err)
-			if strings.Contains(err.Error(), "exceeds your quota") {
-				return "", errors.New("Aò, a' Serpico de li mejo parenti stretti senza li bbraghe, qua ElevenLabs ha fatto er vento. E cacciali sti ddù spicci pe' famme generà l'audio. Mannacele ar pelato si voj.")
-			}
-			return "", errors.New("Se vede che quarcosa non va ccò UnniciLabboradorio. Tiè un po' qua e vedi se capisci te che sei imparato: " + err.Error())
-		}
-
-		lastGeneratedAudioTime = time.Now()
-		isFirstGeneration = false
-
-		audioTitle := MakeAudioTitle(prompt)
-		generatedAudioFilename := audioTitle + "-" + strconv.FormatInt(lastGeneratedAudioTime.UnixMilli(), 10) + ".mp3"
-		generatedAudioDir := filepath.Join(".temp", "elevenlabs_generated")
-		generatedAudioCompletePath := filepath.Join(generatedAudioDir, generatedAudioFilename)
-
-		os.MkdirAll(generatedAudioDir, os.ModePerm)
-
-		log.Printf("[ElevenLabs client] Saving elevenlabs generated audio '%s'", generatedAudioCompletePath)
-		if err := os.WriteFile(generatedAudioCompletePath, audio, os.ModePerm); err != nil {
-			log.Printf("Failing save ElevenLabs mp3 file writing -> %v", err)
-			return "", err
-		}
-
-		return generatedAudioCompletePath, nil
-	} else {
-		return "", errors.New("A cojò, li mortacci stracci tua ma che me voj rovinà? So ppasati solo " + utils.ToReadableSince(time.Now(), lastGeneratedAudioTime) + " da nantro vocale. Statte bbono pe' n'antri " + utils.ToReadableHowLongTo(time.Now(), lastGeneratedAudioTime, GENERATION_WAITING_PERIOD))
+	payload := elapi.TextToSpeechRequest{
+		Text:    prompt,
+		ModelID: "eleven_multilingual_v2",
 	}
+
+	audio, err := elclient.TextToSpeech(pickedVoice, payload)
+	if err != nil {
+		log.Printf("Failing ElevenLabs call -> %v", err)
+		if strings.Contains(err.Error(), "exceeds your quota") {
+			return "", errors.New("Aò, a' Serpico de li mejo parenti stretti senza li bbraghe, qua ElevenLabs ha fatto er vento. E cacciali sti ddù spicci pe' famme generà l'audio. Mannacele ar pelato si voj.")
+		}
+		return "", errors.New("Se vede che quarcosa non va ccò UnniciLabboradorio. Tiè un po' qua e vedi se capisci te che sei imparato: " + err.Error())
+	}
+
+	audioTitle := MakeAudioTitle(prompt)
+	generatedAudioFilename := audioTitle + "-" + strconv.FormatInt(time.Now().UnixMilli(), 10) + ".mp3"
+	generatedAudioDir := filepath.Join(".temp", "elevenlabs_generated")
+	generatedAudioCompletePath := filepath.Join(generatedAudioDir, generatedAudioFilename)
+
+	os.MkdirAll(generatedAudioDir, os.ModePerm)
+
+	log.Printf("[ElevenLabs client] Saving elevenlabs generated audio '%s'", generatedAudioCompletePath)
+	if err := os.WriteFile(generatedAudioCompletePath, audio, os.ModePerm); err != nil {
+		log.Printf("Failing save ElevenLabs mp3 file writing -> %v", err)
+		return "", err
+	}
+
+	return generatedAudioCompletePath, nil
 }
 
 func GetSubscriptionStatus() string {
