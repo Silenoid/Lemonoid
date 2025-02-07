@@ -2,7 +2,6 @@ package openai
 
 import (
 	"context"
-	"errors"
 	"log"
 
 	"github.com/Silenoid/Lemonoid/internal/utils"
@@ -42,7 +41,7 @@ func GenerateStory(prompt string) (string, error) {
 
 	if err != nil {
 		log.Printf("Failing OpenAI call -> %v", err)
-		return "", errors.New("error during OpenAi call")
+		return "", err
 	}
 
 	log.Printf("[OpenAi client] %s", resp.Choices[0].Message.Content)

@@ -1,10 +1,12 @@
 package telegram
 
 import (
+	"bytes"
 	"context"
 	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -53,6 +55,7 @@ func Initialize() {
 
 	customOptions := []bot.Option{
 		bot.WithDefaultHandler(defaultHandler),
+		bot.WithCheckInitTimeout(60 * time.Second),
 		// bot.WithDebug(),
 	}
 
@@ -61,77 +64,79 @@ func Initialize() {
 		log.Panic("Error during bot initialization -> ", err)
 	}
 
+	tgClient = telegramBot
+
+	startTime = time.Now()
+}
+
+func Listen() {
+	// Gracefull shotdown
 	backgroundContext, interruptCallback := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer interruptCallback()
 
 	bgCtx = backgroundContext
-	tgClient = telegramBot
 
-	tgClient.Start(bgCtx)
-
-	startTime = time.Now()
-	SendMessage(CHATID_LORD, "Lemonoid awakened at "+utils.ToReadableDate(startTime))
-}
-
-func defaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
-	if update.Message != nil {
-		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: update.Message.Chat.ID,
-			Text:   update.Message.Text,
-		})
-	}
-
-	params := &bot.SendPhotoParams{
-		ChatID:  update.Message.Chat.ID,
-		Photo:   &models.InputFileString{Data: "AgACAgIAAxkDAAIBOWJimnCJHQJiJ4P3aasQCPNyo6mlAALDuzEbcD0YSxzjB-vmkZ6BAQADAgADbQADJAQ"},
-		Caption: "Preloaded Facebook logo",
-	}
-
-	b.SendPhoto(ctx, params)
-}
-
-func Listen() {
-	if len(token) == 0 {
-		panic("Telegram token is not set")
-	}
-
-	updateConfig := tgbotapi.NewUpdate(0)
-	updateConfig.Timeout = 60
-	updatesChannel := tgClient.GetUpdatesChan(updateConfig)
-	updatesChannel.Clear()
+	tgClient.SetMyCommands(backgroundContext, &bot.SetMyCommandsParams{
+		Commands: []models.BotCommand{
+			{Command: "help", Description: "s'aiutamo"},
+			{Command: "status", Description: "'ndo stamo"},
+			{Command: "tldr", Description: "che se dice"},
+			{Command: "stamoce", Description: "quanno se vedemo"},
+			{Command: "sperimentale", Description: "non clickare mai"},
+		},
+	})
 
 	log.Println("[Telegram client] Telegram client is listening...")
 
-	for update := range updatesChannel {
+	SendMessage(CHATID_LORD, "Lemonoid awakened at "+utils.ToReadableDate(startTime))
 
-		if update.Message != nil {
-			utils.PrintMsg(update)
+	tgClient.Start(bgCtx)
+}
 
-			if update.Message.Time().Before(startTime) {
-				log.Printf("Not processing message %d from %s-%d because of previous messages cleanup",
+func defaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+	// if update.Message != nil {
+	// 	b.SendMessage(ctx, &bot.SendMessageParams{
+	// 		ChatID: update.Message.Chat.ID,
+	// 		Text:   update.Message.Text,
+	// 	})
+	// }
+
+	// params := &bot.SendPhotoParams{
+	// 	ChatID:  update.Message.Chat.ID,
+	// 	Photo:   &models.InputFileString{Data: "AgACAgIAAxkDAAIBOWJimnCJHQJiJ4P3aasQCPNyo6mlAALDuzEbcD0YSxzjB-vmkZ6BAQADAgADbQADJAQ"},
+	// 	Caption: "Preloaded Facebook logo",
+	// }
+
+	// b.SendPhoto(ctx, params)
+
+	if update.Message != nil {
+		utils.PrintMsg(update)
+
+		// update.Message.Date
+		// time.unix
+		// if update.Message.Time().Before(startTime) {
+		// 	log.Printf("Not processing message %d from %s-%d because of previous messages cleanup",
+		// 		update.Message.From.ID,
+		// 		update.Message.From.UserName,
+		// 		update.Message.From.ID)
+
+		// }
+
+		if isAllowedChatId(update.Message.Chat.ID) {
+			err := processAndDispatch(update)
+
+			if err != nil {
+				log.Printf("Error during processing of message from %s-%d with ID %d\n%v",
+					update.Message.From.Username,
 					update.Message.From.ID,
-					update.Message.From.UserName,
-					update.Message.From.ID)
-
+					update.Message.ID,
+					err)
 			}
-
-			if isAllowedChatId(update.Message.Chat.ID) {
-				err := processAndDispatch(update)
-
-				if err != nil {
-					log.Printf("Error during processing of message from %s-%d with ID %d\n%v",
-						update.Message.From.UserName,
-						update.Message.From.ID,
-						update.Message.MessageID,
-						err)
-				}
-			} else {
-				log.Printf("Not processing message %d from %s-%d because of chat exclusions",
-					update.Message.From.ID,
-					update.Message.From.UserName,
-					update.Message.From.ID)
-			}
-
+		} else {
+			log.Printf("Not processing message %d from %s-%d because of chat exclusions",
+				update.Message.From.ID,
+				update.Message.From.Username,
+				update.Message.From.ID)
 		}
 	}
 }
@@ -140,10 +145,10 @@ func isAllowedChatId(chatId int64) bool {
 	return (chatId == CHATID_CHICECE || chatId == CHATID_LORD)
 }
 
-func processAndDispatch(update tgbotapi.Update) error {
+func processAndDispatch(update *models.Update) error {
 	message := update.Message
 	chat := update.Message.Chat
-	senderName := update.Message.From.UserName
+	senderName := update.Message.From.Username
 	senderId := update.Message.From.ID
 	textReceived := update.Message.Text
 
@@ -151,24 +156,24 @@ func processAndDispatch(update tgbotapi.Update) error {
 		history.AddMessageToChatHistory(chat.ID, senderId, senderName, message.Text)
 	}
 
-	if update.Message.IsCommand() {
-		switch update.Message.Command() {
-		case "help":
-			return handlerHelp(update)
-		case "status":
-			return handlerStatus(update)
-		case "tldr":
-			return handlerTldr(update)
-		case "stamoce":
-			return handlerStamoce(update)
-		default:
-			log.Printf("Command %s has not been recognized. Nope.", update.Message.Command())
-		}
+	log.Println("Processing message: " + textReceived)
+
+	switch textReceived {
+	case "/help":
+		return handlerHelp(update)
+	case "/status":
+		return handlerStatus(update)
+	case "/tldr":
+		return handlerTldr(update)
+	case "/stamoce":
+		return handlerStamoce(update)
+	default:
+		log.Printf("Command '%s' has not been recognized. Nope.", textReceived)
 	}
 	return nil
 }
 
-func handlerHelp(update tgbotapi.Update) error {
+func handlerHelp(update *models.Update) error {
 	SendMessage(update.Message.Chat.ID, `Aò a manzo, eccote du seppie e ttre ppiovre de aiuto:
 	/help	l'hai usato mò a cojone, ma che sei frocio?
 	/tldr	azzì questo teggenera er tuloddonrì
@@ -177,110 +182,105 @@ func handlerHelp(update tgbotapi.Update) error {
 	return nil
 }
 
-func handlerStatus(update tgbotapi.Update) error {
+func handlerStatus(update *models.Update) error {
 	ElevenLabsSubStatus := elevenlabs.GetSubscriptionStatus()
-	// TODO: get OpenAI usage with a request (see openai client.go)
 	SendMessage(update.Message.Chat.ID, ElevenLabsSubStatus)
 	return nil
 }
 
-func handlerTldr(update tgbotapi.Update) error {
+func handlerTldr(update *models.Update) error {
 	chatHistory := history.GetChatHistory(update.Message.Chat.ID)
 	pickedPromptTheme := utils.PickFromArray(PROMPT_THEMES)
 	// pickedVoice := utils.PickFromArray(elevenlabs.BASIC_VOICES)
 	// Impose G Maronne
 	pickedVoice := "ml5JfpB48j688Rpbbz2M"
 
-	openAiPromptBuilder := strings.Builder{}
-	openAiPromptBuilder.WriteString("Genera un riassunto della seguente chat come se fosse ")
-	openAiPromptBuilder.WriteString(pickedPromptTheme)
+	llmPromptBuilder := strings.Builder{}
+	llmPromptBuilder.WriteString("Genera un riassunto della seguente chat come se fosse ")
+	llmPromptBuilder.WriteString(pickedPromptTheme)
 
 	switch pickedVoice {
 	case "IzoLtTXseyrunESwWmw3": // Se è M TODO: definisci enum o tipo
-		openAiPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'devastaaaante' e facendo paragoni col Giappone:\n")
+		llmPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'devastaaaante' e facendo paragoni col Giappone:\n")
 	case "i86lB8eIKMQcO470EIFz", "ml5JfpB48j688Rpbbz2M": // // Se è G o G Maronne
-		openAiPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'WAGOOOOO' ed concludendo, alla fine, suggerendo un piatto di pasta insolito da cucinare:\n")
+		llmPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'WAGOOOOO' ed concludendo, alla fine, suggerendo un piatto di pasta insolito da cucinare:\n")
 	case "d9Gr3L3YR4d9Sf9Gt8cV": // Se è S
-		openAiPromptBuilder.WriteString(", utilizzando almeno una volta ciascuno i termini 'non ironicamente', 'cringe' e 'è tutta colpa di Enzo':\n")
+		llmPromptBuilder.WriteString(", utilizzando almeno una volta ciascuno i termini 'non ironicamente', 'cringe' e 'è tutta colpa di Enzo':\n")
 	default:
-		openAiPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'grottesco':\n")
+		llmPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'grottesco':\n")
 	}
 
-	openAiPromptBuilder.WriteString(chatHistory)
-	openAiPrompt := openAiPromptBuilder.String()
+	llmPromptBuilder.WriteString(chatHistory)
+	llmPrompt := llmPromptBuilder.String()
 
-	log.Printf("Prompt a tema '%s' con voce '%s': %s", pickedPromptTheme, pickedVoice, openAiPrompt)
-	elevenLabsPrompt, err := openai.GenerateStory(openAiPrompt)
+	log.Printf("Prompt a tema '%s' con voce '%s': %s", pickedPromptTheme, pickedVoice, llmPrompt)
+	generatedStory, err := openai.GenerateStory(llmPrompt)
 	if err != nil {
+		if strings.Contains(update.Message.Text, "exceeded your current quota") {
+			SendMessage(update.Message.Chat.ID, "Ao, so ffiniti li sordi pe generà er testo li mortacci stracci")
+		}
+		SendMessage(CHATID_LORD, err.Error())
 		return err
 	}
 
-	generatedAudioPath, err := elevenlabs.GenerateVoiceNarration(elevenLabsPrompt, pickedVoice)
+	generatedAudioPath, err := elevenlabs.GenerateVoiceNarration(generatedStory, pickedVoice)
 	if err != nil {
-		SendMessage(update.Message.Chat.ID, "Errore durante la generazione vocale: "+err.Error())
+		SendMessage(update.Message.Chat.ID, "Errore nella generazione vocale, dunque beccate solo er testo generato e muto:/n"+generatedStory)
 		return err
 	}
 
 	SendMessage(update.Message.Chat.ID, "Tema utilizzato per il prompt: "+pickedPromptTheme)
 	sendAudio(update.Message.Chat.ID, generatedAudioPath)
-	SendMessage(CHATID_LORD, "Generated story:\n"+elevenLabsPrompt)
+	SendMessage(CHATID_LORD, "Generated story:\n"+generatedStory)
 	return nil
 }
 
-func handlerStamoce(update tgbotapi.Update) error {
+func handlerStamoce(update *models.Update) error {
 	// Telegram supports only up to 10 options
-	pollChoices := []string{
-		"Lunneddì sera",
-		"Marteddì sera",
-		"Mercoleddì sera",
-		"Gioveddì sera",
-		"Venerdì sera",
-		"Sabato mattina",
-		"Sabato sera",
-		"Domenica mattina",
-		"Domenica sera",
-		utils.PickFromArray([]string{
-			"Sono calvo",
-			"Oh no, sono stato Matteato",
-			"Non mi sento bene, devo riposare",
-			"Sesso papà Gaetano",
-			"Corro nudo urlando per le strade di Napoli",
-			"Grottesco",
-			"Sasso",
-			"C'è la partita del Napoli",
-			"Simpo per Matteo Criccomoro",
-			"Preparo due crostate",
-			"Sono il Re dei Simp",
-		}),
+	pollOptions := []models.InputPollOption{
+		{Text: "Lunneddì sera"},
+		{Text: "Marteddì sera"},
+		{Text: "Mercoleddì sera"},
+		{Text: "Gioveddì sera"},
+		{Text: "Venerdì sera"},
+		{Text: "Sabato mattina"},
+		{Text: "Sabato sera"},
+		{Text: "Domenica mattina"},
+		{Text: "Domenica sera"},
 	}
 
-	pollConfig := tgbotapi.SendPollConfig{
-		BaseChat: tgbotapi.BaseChat{
-			ChatID: update.Message.Chat.ID,
+	tgClient.SendPoll(
+		bgCtx,
+		&bot.SendPollParams{
+			ChatID:                update.Message.Chat.ID,
+			Question:              "Quanno ce stamo?",
+			Options:               pollOptions,
+			IsAnonymous:           bot.False(),
+			AllowsMultipleAnswers: *bot.True(),
+			Explanation:           "t'o devo pure spiegà?",
 		},
-		Question:              "Quanno ce stamo?",
-		Options:               pollChoices,
-		IsAnonymous:           false,
-		AllowsMultipleAnswers: true,
-		Explanation:           "t'o devo pure spiegà?",
-	}
+	)
 
-	tgClient.Send(pollConfig)
 	return nil
 }
 
 func sendAudio(chatId int64, audioPath string) {
-	audioFile := tgbotapi.FilePath(audioPath)
-	msg := tgbotapi.NewAudio(chatId, audioFile)
+	audioFileContent, err := os.ReadFile(audioPath)
 
-	sentMessage, err := tgClient.Send(msg)
-
-	if err != nil && strings.Contains(err.Error(), "nil") {
-		forwardMsg := tgbotapi.NewForward(CHATID_LORD, sentMessage.Chat.ID, sentMessage.MessageID)
-		tgClient.Send(forwardMsg)
-	} else {
-		log.Printf("Couldn't forward the message with audio %s.\n%v", audioPath, err)
+	if err != nil {
+		log.Println("Errore nella lettura del file audio " + audioPath)
+		return
 	}
+
+	sendVoiceParams := bot.SendVoiceParams{
+		ChatID: chatId,
+		Voice: &models.InputFileUpload{
+			Filename: filepath.Base(audioPath),
+			Data:     bytes.NewReader(audioFileContent),
+		},
+	}
+
+	tgClient.SendVoice(bgCtx, &sendVoiceParams)
 }
 
 func SendMessage(chatId int64, text string) {
