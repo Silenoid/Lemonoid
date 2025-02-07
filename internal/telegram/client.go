@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/Silenoid/Lemonoid/internal/elevenlabs"
+	"github.com/Silenoid/Lemonoid/internal/gemini"
 	"github.com/Silenoid/Lemonoid/internal/history"
-	"github.com/Silenoid/Lemonoid/internal/openai"
 	"github.com/Silenoid/Lemonoid/internal/utils"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
@@ -214,7 +214,7 @@ func handlerTldr(update *models.Update) error {
 	llmPrompt := llmPromptBuilder.String()
 
 	log.Printf("Prompt a tema '%s' con voce '%s': %s", pickedPromptTheme, pickedVoice, llmPrompt)
-	generatedStory, err := openai.GenerateStory(llmPrompt)
+	generatedStory, err := gemini.GenerateStory(llmPrompt)
 	if err != nil {
 		if strings.Contains(update.Message.Text, "exceeded your current quota") {
 			SendMessage(update.Message.Chat.ID, "Ao, so ffiniti li sordi pe generà er testo li mortacci stracci")
