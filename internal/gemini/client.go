@@ -34,11 +34,15 @@ func Initialize() {
 }
 
 func GenerateStory(prompt string) (string, error) {
+	temperature := 1.0
+
 	result, err := geminiClient.Models.GenerateContent(
 		backgroundContext,
 		GEMINI_MODEL,
 		genai.Text(prompt),
-		nil,
+		&genai.GenerateContentConfig{
+			Temperature: &temperature,
+		},
 	)
 
 	if err != nil {
