@@ -143,7 +143,7 @@ func handlerTldr(ctx context.Context, b *bot.Bot, update *models.Update) {
 	llmPromptBuilder.WriteString(chatHistory)
 	llmPrompt := llmPromptBuilder.String()
 
-	log.Printf("Prompt a tema '%s' con voce '%s': %s", pickedPromptTheme, pickedVoice, llmPrompt)
+	log.Printf("Prompt a tema '%s': %s", pickedPromptTheme, llmPrompt)
 	RespondWithText(update, "Tema utilizzato per il prompt: "+pickedPromptTheme)
 
 	generatedStory, err := gemini.GenerateStory(llmPrompt)
