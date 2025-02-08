@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Silenoid/Lemonoid/internal/elevenlabs"
@@ -19,15 +20,25 @@ func GenerateVoiceNarration(prompt string) (string, error) {
 
 	os.MkdirAll(generatedAudioDir, os.ModePerm)
 
-	cmd := exec.Command(
+	echoCmd := exec.Command(
+		"echo",
+		strings.ReplaceAll(prompt, "\n", ""),
+	)
+
+	piperCmd := exec.Command(
 		"piper-tts",
 		"--model", "/home/sileno/Test/paola.onx",
-		"--json-input", "{ \"text\": "+prompt+" }",
 		"--output-file", generatedAudioCompletePath,
 		"--sentence_silence", "0.4",
 	)
 
-	stdout, err := cmd.Output()
+	echoPipe, _ := echoCmd.StdoutPipe()
+	defer echoPipe.Close()
+
+	piperCmd.Stdin = echoPipe
+
+	echoCmd.Start()
+	stdout, err := piperCmd.Output()
 	if err != nil {
 		log.Println("Error during piper tts generation: " + err.Error())
 		return "", err
