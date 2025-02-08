@@ -9,15 +9,19 @@ import (
 	"github.com/Silenoid/Lemonoid/internal/elevenlabs"
 	"github.com/Silenoid/Lemonoid/internal/gemini"
 	"github.com/Silenoid/Lemonoid/internal/history"
+	"github.com/Silenoid/Lemonoid/internal/piper"
 	"github.com/Silenoid/Lemonoid/internal/utils"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 )
 
 const TLDRPRO_WAIT_TIME = time.Hour * 72
+const TLDR_WAIT_TIME = time.Hour * 3
 
 var lastTLDRPROTime time.Time
+var lastTLDRTime time.Time
 var isFirstTLDRPRO = false
+var isFirstTLDR = false
 
 func defaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	if update.Message != nil {
@@ -116,7 +120,7 @@ func handlerTldrPro(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 	generatedAudioPath, err := elevenlabs.GenerateVoiceNarration(generatedStory, pickedVoice)
 	if err != nil {
-		RespondWithText(update, "Errore nella generazione vocale, dunque beccate solo er testo generato e muto:\n"+generatedStory)
+		RespondWithText(update, "Errore nella generazione vocale, dunque beccate solo er testo generato e muto:\n\n"+generatedStory)
 	}
 
 	sendAudio(update, generatedAudioPath)
@@ -124,14 +128,42 @@ func handlerTldrPro(ctx context.Context, b *bot.Bot, update *models.Update) {
 }
 
 func handlerTldr(ctx context.Context, b *bot.Bot, update *models.Update) {
-	RespondWithText(update, "Stamo lavorannoce")
-	params := &bot.SendPhotoParams{
-		ChatID:  update.Message.Chat.ID,
-		Photo:   &models.InputFileString{Data: "AgACAgIAAxkDAAIBOWJimnCJHQJiJ4P3aasQCPNyo6mlAALDuzEbcD0YSxzjB-vmkZ6BAQADAgADbQADJAQ"},
-		Caption: "Preloaded Facebook logo",
+	if !isFirstTLDR && time.Now().Before(lastTLDRTime.Add(TLDR_WAIT_TIME)) {
+		RespondWithText(update, "A cojò, li mortacci stracci tua ma che me voj rovinà? So ppasati solo "+utils.ToReadableSince(time.Now(), lastTLDRTime)+" da nantro vocale. Statte bbono pe' n'antri "+utils.ToReadableHowLongTo(time.Now(), lastTLDRTime, TLDR_WAIT_TIME))
+		return
 	}
 
-	b.SendPhoto(ctx, params)
+	chatHistory := history.GetChatHistory(update.Message.Chat.ID)
+	pickedPromptTheme := utils.PickFromArray(PROMPT_THEMES)
+
+	llmPromptBuilder := strings.Builder{}
+	llmPromptBuilder.WriteString("Genera un riassunto della seguente chat come se fosse")
+	llmPromptBuilder.WriteString(pickedPromptTheme)
+	llmPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'WAGOOOOO' ed concludendo, alla fine, suggerendo un piatto di pasta insolito da cucinare:\n")
+	llmPromptBuilder.WriteString(chatHistory)
+	llmPrompt := llmPromptBuilder.String()
+
+	log.Printf("Prompt a tema '%s' con voce '%s': %s", pickedPromptTheme, pickedVoice, llmPrompt)
+	RespondWithText(update, "Tema utilizzato per il prompt: "+pickedPromptTheme)
+
+	generatedStory, err := gemini.GenerateStory(llmPrompt)
+	if err != nil {
+		if strings.Contains(update.Message.Text, "exceeded your current quota") {
+			RespondWithText(update, "Ao, so ffiniti li sordi pe generà er testo li mortacci stracci")
+		}
+		SendMessage(CHATID_LORD, err.Error())
+	}
+
+	lastTLDRTime = time.Now()
+	isFirstTLDR = false
+
+	generatedAudioPath, err := piper.GenerateVoiceNarration(generatedStory)
+	if err != nil {
+		RespondWithText(update, "Errore nella generazione vocale, dunque beccate solo er testo generato e muto:\n\n"+generatedStory)
+	}
+
+	sendAudio(update, generatedAudioPath)
+	SendMessage(CHATID_LORD, "Generated story:\n"+generatedStory)
 }
 
 func handlerStamoce(ctx context.Context, b *bot.Bot, update *models.Update) {
