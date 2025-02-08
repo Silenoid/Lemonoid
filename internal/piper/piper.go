@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Silenoid/Lemonoid/internal/elevenlabs"
@@ -21,7 +22,7 @@ func GenerateVoiceNarration(prompt string) (string, error) {
 
 	cmd := exec.Command(
 		"echo",
-		"'"+prompt+"'",
+		"'"+strings.ReplaceAll(prompt, "\n", "")+"'",
 		" | ",
 		"piper-tts",
 		"--model", "/home/sileno/Test/paola.onx",
