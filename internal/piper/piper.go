@@ -21,7 +21,7 @@ func GenerateVoiceNarration(prompt string) (string, error) {
 
 	cmd := exec.Command(
 		"echo",
-		prompt,
+		"'"+prompt+"'",
 		" | ",
 		"piper-tts",
 		"--model", "/home/sileno/Test/paola.onx",
