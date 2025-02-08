@@ -6,7 +6,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/Silenoid/Lemonoid/internal/elevenlabs"
@@ -21,12 +20,11 @@ func GenerateVoiceNarration(prompt string) (string, error) {
 	os.MkdirAll(generatedAudioDir, os.ModePerm)
 
 	cmd := exec.Command(
-		"echo",
-		"'"+strings.ReplaceAll(prompt, "\n", "")+"'",
-		" | ",
 		"piper-tts",
 		"--model", "/home/sileno/Test/paola.onx",
+		"--json-input", "{ \"text\": "+prompt+" }",
 		"--output-file", generatedAudioCompletePath,
+		"--sentence_silence", "0.4",
 	)
 
 	stdout, err := cmd.Output()
