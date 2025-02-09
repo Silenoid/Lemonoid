@@ -1,12 +1,12 @@
 package piper
 
 import (
+	"bytes"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/Silenoid/Lemonoid/internal/elevenlabs"
@@ -22,7 +22,8 @@ func GenerateVoiceNarration(prompt string) (string, error) {
 
 	echoCmd := exec.Command(
 		"echo",
-		strings.ReplaceAll(prompt, "\n", ""),
+		// strings.ReplaceAll(prompt, "\n", ""),
+		"novabbe wagooooooooo sesso papa gaetano",
 	)
 
 	piperCmd := exec.Command(
@@ -32,18 +33,23 @@ func GenerateVoiceNarration(prompt string) (string, error) {
 		"--sentence_silence", "0.4",
 	)
 
-	echoPipe, _ := echoCmd.StdoutPipe()
-	defer echoPipe.Close()
+	piperCmd.Stdin, _ = echoCmd.StdoutPipe()
 
-	piperCmd.Stdin = echoPipe
+	var out bytes.Buffer
+	piperCmd.Stdout = &out
 
-	echoCmd.Start()
-	stdout, err := piperCmd.CombinedOutput()
+	err := echoCmd.Run()
 	if err != nil {
-		log.Println("Error during piper tts generation: " + err.Error())
+		log.Println("Error during echo command in tts generation: " + err.Error())
 		return "", err
 	}
-	log.Println(string(stdout[:]))
+
+	err = piperCmd.Run()
+	if err != nil {
+		log.Println("Error during piper command in tts generation: " + err.Error())
+		return "", err
+	}
+	log.Println(string(out.String()))
 
 	return generatedAudioCompletePath, nil
 }
