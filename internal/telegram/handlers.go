@@ -163,6 +163,7 @@ func handlerTldr(ctx context.Context, b *bot.Bot, update *models.Update) {
 	}
 
 	sendAudio(update, generatedAudioPath)
+	RespondWithText(update, generatedStory)
 	SendMessage(CHATID_LORD, "Generated story:\n"+generatedStory)
 }
 

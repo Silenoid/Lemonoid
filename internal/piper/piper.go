@@ -27,7 +27,10 @@ func GenerateVoiceNarration(prompt string) (string, error) {
 		"--sentence_silence", "0.4",
 	)
 
-	piperCmd.Stdin = strings.NewReader(prompt)
+	sanitizedPrompt := strings.ReplaceAll(prompt, "*", "")
+	sanitizedPrompt = strings.ReplaceAll(sanitizedPrompt, "#", "")
+
+	piperCmd.Stdin = strings.NewReader(sanitizedPrompt)
 
 	eout, err := piperCmd.CombinedOutput()
 	if err != nil {
