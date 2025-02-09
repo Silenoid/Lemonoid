@@ -22,7 +22,7 @@ func GenerateVoiceNarration(prompt string) (string, error) {
 
 	piperCmd := exec.Command(
 		"piper-tts",
-		"--model", "/home/sileno/Test/paola.onx",
+		"--model", "/home/sileno/Test/paola.onnx",
 		"--output-file", generatedAudioCompletePath,
 		"--sentence_silence", "0.4",
 	)
