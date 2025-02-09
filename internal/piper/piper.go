@@ -38,7 +38,7 @@ func GenerateVoiceNarration(prompt string) (string, error) {
 	piperCmd.Stdin = echoPipe
 
 	echoCmd.Start()
-	stdout, err := piperCmd.Output()
+	stdout, err := piperCmd.CombinedOutput()
 	if err != nil {
 		log.Println("Error during piper tts generation: " + err.Error())
 		return "", err
