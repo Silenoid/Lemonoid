@@ -137,7 +137,7 @@ func handlerTldr(ctx context.Context, b *bot.Bot, update *models.Update) {
 	pickedPromptTheme := utils.PickFromArray(PROMPT_THEMES)
 
 	llmPromptBuilder := strings.Builder{}
-	llmPromptBuilder.WriteString("Genera un riassunto della seguente chat come se fosse")
+	llmPromptBuilder.WriteString("Genera un riassunto di meno di 1400 parole della seguente chat come se fosse")
 	llmPromptBuilder.WriteString(pickedPromptTheme)
 	llmPromptBuilder.WriteString(", utilizzando almeno una volta il termine 'WAGOOOOO' ed concludendo, alla fine, suggerendo un piatto di pasta insolito da cucinare:\n")
 	llmPromptBuilder.WriteString(chatHistory)
