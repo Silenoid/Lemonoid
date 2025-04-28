@@ -35,13 +35,15 @@ func Initialize() {
 
 func GenerateStory(prompt string) (string, error) {
 	temperature := 1.0
+	var maxTokens int64 = 350
 
 	result, err := geminiClient.Models.GenerateContent(
 		backgroundContext,
 		GEMINI_MODEL,
 		genai.Text(prompt),
 		&genai.GenerateContentConfig{
-			Temperature: &temperature,
+			Temperature:     &temperature,
+			MaxOutputTokens: &maxTokens,
 		},
 	)
 
